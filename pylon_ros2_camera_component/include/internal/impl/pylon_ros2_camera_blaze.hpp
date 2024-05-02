@@ -42,6 +42,7 @@
 
 #include "pcl_conversions/pcl_conversions.h"
 
+
 #pragma pack(push, 1)
 struct BGR 
 {
@@ -609,7 +610,7 @@ bool PylonROS2BlazeCamera::convertGrabResultToPointCloud(const Pylon::CPylonData
     const size_t height = range_component.GetHeight();
 
     // allocate PCL point cloud.
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr ppoint_cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
+    auto ppoint_cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
     ppoint_cloud->width = width;
     ppoint_cloud->height = height;
     ppoint_cloud->points.resize(width * height);

@@ -86,8 +86,9 @@ namespace pylon_ros2_camera
       rclcpp_action::Client<GrabBlazeDataAction>::SharedPtr client_ptr_;
       rclcpp::TimerBase::SharedPtr timer_;
 
-      void goal_response_callback(const GrabBlazeDataGoalHandle::SharedPtr & goal_handle)
+      void goal_response_callback(std::shared_future<GrabBlazeDataGoalHandle::SharedPtr> future)
       {
+        auto goal_handle=future.get();
         if (!goal_handle)
         {
           RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
