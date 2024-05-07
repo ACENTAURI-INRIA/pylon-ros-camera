@@ -1016,9 +1016,10 @@ bool PylonROS2CameraNode::grabImage()
   {
     // Store current time before the image is transmitted for a more accurate grab time estimation
     auto grab_time = rclcpp::Node::now();
-    if (ptrGrabResult->ChunkTimestamp.IsReadable())
+    int chunk_time = this->pylon_camera_->getChunkTimestamp();
+    if (chunk_time=!0)
       {
-          grab_time = rclcpp::Time(ptrGrabResult->ChunkTimestamp.GetValue());
+          grab_time = rclcpp::Time(chunk_time);
       }
     if (!this->pylon_camera_->grab(this->img_raw_msg_.data))
     {
