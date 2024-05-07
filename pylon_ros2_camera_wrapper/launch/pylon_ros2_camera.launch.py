@@ -5,9 +5,10 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, RegisterEventHandler, LogInfo
+from launch.substitutions import LaunchConfiguration, FindExecutable
 from launch_ros.actions import Node
+from launch.event_handlers import OnProcessStart
 
 
 def generate_launch_description():
@@ -107,6 +108,32 @@ def generate_launch_description():
         ]
     )
 
+    #event handlers
+    user_load_right = ExecuteProcess(
+        cmd=[
+            [
+                FindExecutable(name="ros2"),
+                " service call ",
+                "/ZOEISA/right_basler_node/enable_ptp ",
+                "std_srvs/srv/SetBool ",
+                '"{data: true}"',
+            ]
+        ],
+        shell=True,
+    )
+    user_load_left = ExecuteProcess(
+        cmd=[
+            [
+                FindExecutable(name="ros2"),
+                " service call ",
+                "/ZOEISA/left_basler_node/enable_ptp",
+                "std_srvs/srv/SetBool",
+                '"{data: true}"',
+            ]
+        ],
+        shell=True,
+    )
+
     # Define LaunchDescription variable and return it
     ld = LaunchDescription()
 
@@ -120,5 +147,23 @@ def generate_launch_description():
     ld.add_action(declare_enable_current_params_publisher_cmd)
 
     ld.add_action(pylon_ros2_camera_node)
+    ld.add_action(RegisterEventHandler(
+            OnProcessStart(
+                target_action=pylon_ros2_camera_node,
+                on_completion=[
+                    LogInfo(msg="load userset for right cam"),
+                    user_load_right
+                ],
+            )
+        ))
+    ld.add_action(RegisterEventHandler(
+            OnProcessStart(
+                target_action=pylon_ros2_camera_node,
+                on_completion=[
+                    LogInfo(msg="load userset for left cam"),
+                    user_load_left
+                ],
+            )
+        ))
 
     return ld
